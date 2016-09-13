@@ -25,7 +25,7 @@ switch Action
         OutcomeRecord = BpodSystem.Data.Custom.OutcomeRecord;
         
         % recompute xlim
-        [mn, mx] = rescaleX(AxesHandle,CurrentTrial,nTrialsToShow);
+        [mn, ~] = rescaleX(AxesHandle,CurrentTrial,nTrialsToShow);
         
         set(BpodSystem.GUIHandles.CurrentTrialCircle, 'xdata', CurrentTrial, 'ydata', .5);
         set(BpodSystem.GUIHandles.CurrentTrialCross, 'xdata', CurrentTrial, 'ydata', .5);
@@ -34,11 +34,11 @@ switch Action
         if ~isempty(OutcomeRecord)
             indxToPlot = mn:CurrentTrial-1;
             %Plot Rewarded Left
-            ndxRwdL = OutcomeRecord(indxToPlot) == 3;
+            ndxRwdL = OutcomeRecord(indxToPlot) == 5;
             Xdata = indxToPlot(ndxRwdL); Ydata = ones(1,sum(ndxRwdL));
             set(BpodSystem.GUIHandles.RewardedL, 'xdata', Xdata, 'ydata', Ydata);
             %Plot Rewarded Right
-            ndxRwdR = OutcomeRecord(indxToPlot) == 4;
+            ndxRwdR = OutcomeRecord(indxToPlot) == 6;
             Xdata = indxToPlot(ndxRwdR); Ydata = zeros(1,sum(ndxRwdR));
             set(BpodSystem.GUIHandles.RewardedR, 'xdata', Xdata, 'ydata', Ydata);            
         end
