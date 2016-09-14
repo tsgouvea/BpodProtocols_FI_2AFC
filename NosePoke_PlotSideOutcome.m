@@ -1,4 +1,4 @@
-function FI_2AFC_PlotSideOutcome(AxesHandle, Action, varargin)
+function NosePoke_PlotSideOutcome(AxesHandle, Action, varargin)
 global nTrialsToShow %this is for convenience
 global BpodSystem
 
@@ -16,7 +16,8 @@ switch Action
         BpodSystem.GUIHandles.CurrentTrialCross = line(-1,0.5, 'LineStyle','none','Marker','+','MarkerEdge','k','MarkerFace',[1 1 1], 'MarkerSize',6);
         BpodSystem.GUIHandles.RewardedL = line(-1,1, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
         BpodSystem.GUIHandles.RewardedR = line(-1,0, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
-        set(AxesHandle,'TickDir', 'out','YLim', [-1, 2], 'YTick', [0 1],'YTickLabel', {'Right','Left'}, 'FontSize', 16);
+        BpodSystem.GUIHandles.EarlyWithdrawal = line(-1,0, 'LineStyle','none','Marker','d','MarkerEdge','none','MarkerFace','b', 'MarkerSize',6);
+        set(AxesHandle,'TickDir', 'out','YLim', [-1, 2],'XLim',[0,nTrialsToShow], 'YTick', [0 1],'YTickLabel', {'Right','Left'}, 'FontSize', 16);
         xlabel(AxesHandle, 'Trial#', 'FontSize', 18);
         hold(AxesHandle, 'on');
         
@@ -41,6 +42,12 @@ switch Action
             ndxRwdR = OutcomeRecord(indxToPlot) == 6;
             Xdata = indxToPlot(ndxRwdR); Ydata = zeros(1,sum(ndxRwdR));
             set(BpodSystem.GUIHandles.RewardedR, 'xdata', Xdata, 'ydata', Ydata);            
+        end
+        if ~isempty(BpodSystem.Data.Custom.EarlyWithdrawal)
+            indxToPlot = mn:CurrentTrial-1;
+            XData = indxToPlot(BpodSystem.Data.Custom.EarlyWithdrawal);
+            YData = 0.5*ones(1,sum(BpodSystem.Data.Custom.EarlyWithdrawal));
+            set(BpodSystem.GUIHandles.EarlyWithdrawal, 'xdata', XData, 'ydata', YData);
         end
 end
 
