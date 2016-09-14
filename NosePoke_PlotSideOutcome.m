@@ -45,8 +45,9 @@ switch Action
         end
         if ~isempty(BpodSystem.Data.Custom.EarlyWithdrawal)
             indxToPlot = mn:CurrentTrial-1;
-            XData = indxToPlot(BpodSystem.Data.Custom.EarlyWithdrawal);
-            YData = 0.5*ones(1,sum(BpodSystem.Data.Custom.EarlyWithdrawal));
+            ndxEarly = BpodSystem.Data.Custom.EarlyWithdrawal(indxToPlot);
+            XData = indxToPlot(ndxEarly);
+            YData = 0.5*ones(1,sum(ndxEarly));
             set(BpodSystem.GUIHandles.EarlyWithdrawal, 'xdata', XData, 'ydata', YData);
         end
 end
