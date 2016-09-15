@@ -17,13 +17,14 @@ switch Action
         BpodSystem.GUIHandles.RewardedL = line(-1,1, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
         BpodSystem.GUIHandles.RewardedR = line(-1,0, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
         BpodSystem.GUIHandles.EarlyWithdrawal = line(-1,0, 'LineStyle','none','Marker','d','MarkerEdge','none','MarkerFace','b', 'MarkerSize',6);
+        BpodSystem.GUIHandles.Jackpot = line(-1,0, 'LineStyle','none','Marker','x','MarkerEdge','r','MarkerFace','r', 'MarkerSize',7);
         set(AxesHandle,'TickDir', 'out','YLim', [-1, 2],'XLim',[0,nTrialsToShow], 'YTick', [0 1],'YTickLabel', {'Right','Left'}, 'FontSize', 16);
         xlabel(AxesHandle, 'Trial#', 'FontSize', 18);
         hold(AxesHandle, 'on');
         
     case 'update'
         CurrentTrial = varargin{1};
-        OutcomeRecord = BpodSystem.Data.Custom.OutcomeRecord;
+        ChoiceLeft = BpodSystem.Data.Custom.ChoiceLeft;
         
         % recompute xlim
         [mn, ~] = rescaleX(AxesHandle,CurrentTrial,nTrialsToShow);
@@ -32,14 +33,14 @@ switch Action
         set(BpodSystem.GUIHandles.CurrentTrialCross, 'xdata', CurrentTrial, 'ydata', .5);
         
         %Plot past trials
-        if ~isempty(OutcomeRecord)
+        if ~isempty(ChoiceLeft)
             indxToPlot = mn:CurrentTrial-1;
             %Plot Rewarded Left
-            ndxRwdL = OutcomeRecord(indxToPlot) == 5;
+            ndxRwdL = ChoiceLeft(indxToPlot) == 1;
             Xdata = indxToPlot(ndxRwdL); Ydata = ones(1,sum(ndxRwdL));
             set(BpodSystem.GUIHandles.RewardedL, 'xdata', Xdata, 'ydata', Ydata);
             %Plot Rewarded Right
-            ndxRwdR = OutcomeRecord(indxToPlot) == 6;
+            ndxRwdR = ChoiceLeft(indxToPlot) == 0;
             Xdata = indxToPlot(ndxRwdR); Ydata = zeros(1,sum(ndxRwdR));
             set(BpodSystem.GUIHandles.RewardedR, 'xdata', Xdata, 'ydata', Ydata);            
         end
@@ -49,6 +50,13 @@ switch Action
             XData = indxToPlot(ndxEarly);
             YData = 0.5*ones(1,sum(ndxEarly));
             set(BpodSystem.GUIHandles.EarlyWithdrawal, 'xdata', XData, 'ydata', YData);
+        end
+        if ~isempty(BpodSystem.Data.Custom.Jackpot)
+            indxToPlot = mn:CurrentTrial-1;
+            ndxJackpot = BpodSystem.Data.Custom.Jackpot(indxToPlot);
+            XData = indxToPlot(ndxJackpot);
+            YData = 0.5*ones(1,sum(ndxJackpot));
+            set(BpodSystem.GUIHandles.Jackpot, 'xdata', XData, 'ydata', YData);
         end
 end
 
