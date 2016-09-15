@@ -215,6 +215,8 @@ BpodSystem.Data.Custom.Jackpot(iTrial+1) = false;
 if  TaskParameters.GUI.Jackpot
     if sum(~isnan(BpodSystem.Data.Custom.ChoiceLeft(1:iTrial)))>10
         TaskParameters.GUI.JackpotTime = max(TaskParameters.GUI.JackpotMin,quantile(BpodSystem.Data.Custom.ST,0.95));
+    else
+        TaskParameters.GUI.JackpotTime = TaskParameters.GUI.JackpotMin;
     end
 end
 
@@ -244,10 +246,14 @@ if TaskParameters.GUI.AutoIncrSample
     if sum(~BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials))/length(ConsiderTrials) > Crit
         if ~BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
             BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.MinSampleIncr));
+        else
+             BpodSystem.Data.Custom.SampleTime(iTrial+1) =  BpodSystem.Data.Custom.SampleTime(iTrial);
         end
     else
         if BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
             BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.MinSampleDecr));
+        else
+            BpodSystem.Data.Custom.SampleTime(iTrial+1) =  BpodSystem.Data.Custom.SampleTime(iTrial);
         end
     end
 else
