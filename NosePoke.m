@@ -19,11 +19,12 @@ if isempty(fieldnames(TaskParameters))
     TaskParameters.GUI.MaxSampleTime = 0.5;
     TaskParameters.GUI.AutoIncrSample = true;
     TaskParameters.GUIMeta.AutoIncrSample.Style = 'checkbox';
-    TaskParameters.GUI.AutoIncrSampleAmount = 0.02;
+    TaskParameters.GUI.MinSampleIncr = 0.01;
+    TaskParameters.GUI.MinSampleDecr = 0.005;
     TaskParameters.GUI.EarlyWithdrawalTimeOut = 1;
     TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
     TaskParameters.GUIMeta.SampleTime.Style = 'text';
-    TaskParameters.GUIPanels.Sampling = {'MinSampleTime','MaxSampleTime','AutoIncrSample','AutoIncrSampleAmount','EarlyWithdrawalTimeOut','SampleTime'};
+    TaskParameters.GUIPanels.Sampling = {'MinSampleTime','MaxSampleTime','AutoIncrSample','MinSampleIncr','MinSampleDecr','EarlyWithdrawalTimeOut','SampleTime'};
     %Reward
     TaskParameters.GUI.rewardAmount = 30;
     TaskParameters.GUI.Deplete = true;
@@ -31,9 +32,10 @@ if isempty(fieldnames(TaskParameters))
     TaskParameters.GUI.DepleteRate = 0.8;
     TaskParameters.GUI.Jackpot = true;
     TaskParameters.GUIMeta.Jackpot.Style = 'checkbox';
-    TaskParameters.GUI.JackpotTime = 2;
+    TaskParameters.GUI.JackpotMin = 1;
+    TaskParameters.GUI.JackpotTime = 1;
     TaskParameters.GUIMeta.JackpotTime.Style = 'text';
-        TaskParameters.GUIPanels.Reward = {'rewardAmount','Deplete','DepleteRate','Jackpot','JackpotTime'};
+        TaskParameters.GUIPanels.Reward = {'rewardAmount','Deplete','DepleteRate','Jackpot','JackpotMin','JackpotTime'};
     TaskParameters.GUI = orderfields(TaskParameters.GUI);
 end
 BpodParameterGUI('init', TaskParameters);
@@ -212,7 +214,7 @@ BpodSystem.Data.Custom.Jackpot(iTrial+1) = false;
 %jackpot time
 if  TaskParameters.GUI.Jackpot
     if sum(~isnan(BpodSystem.Data.Custom.ChoiceLeft(1:iTrial)))>10
-        TaskParameters.GUI.JackpotTime = max(1,quantile(BpodSystem.Data.Custom.ST,0.95));
+        TaskParameters.GUI.JackpotTime = max(TaskParameters.GUI.JackpotMin,quantile(BpodSystem.Data.Custom.ST,0.95));
     end
 end
 
@@ -240,9 +242,13 @@ if TaskParameters.GUI.AutoIncrSample
     end
     ConsiderTrials = ConsiderTrials(~isnan(BpodSystem.Data.Custom.ChoiceLeft(ConsiderTrials))|BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials));
     if sum(~BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials))/length(ConsiderTrials) > Crit
-        BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.AutoIncrSampleAmount));
+        if ~BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
+            BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.MinSampleIncr));
+        end
     else
-        BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.AutoIncrSampleAmount));
+        if BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
+            BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.MinSampleDecr));
+        end
     end
 else
     BpodSystem.Data.Custom.SampleTime(iTrial+1) = TaskParameters.GUI.MinSampleTime;

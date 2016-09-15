@@ -58,6 +58,7 @@ switch Action
             YData = 0.5*ones(1,sum(ndxJackpot));
             set(BpodSystem.GUIHandles.Jackpot, 'xdata', XData, 'ydata', YData);
         end
+
 end
 
 end
