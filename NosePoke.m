@@ -157,6 +157,8 @@ elseif BpodSystem.Data.Custom.OutcomeRecord(iTrial) == 6
     BpodSystem.Data.Custom.ChoiceLeft(iTrial) = 0;
 end
 
+% BpodSystem.Data.Custom.SamplingTime = BpodSystem.Data.RawEvents.Trial{iTrial}.States.unrewarded_Lin
+
 if ismember(7,statesVisited)
     BpodSystem.Data.Custom.EarlyWithdrawal(iTrial) = true;
 end
@@ -181,14 +183,24 @@ end
 
 %increase sample time
 if TaskParameters.GUI.AutoIncrSample
-    if ~BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
-        BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.AutoIncrSampleAmount);
+    History = 50;
+    Crit = 0.8;
+    if iTrial<10
+        ConsiderTrials = iTrial;
     else
-        BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.AutoIncrSampleAmount);
+        ConsiderTrials = max(1,iTrial-History):1:iTrial;
+    end
+    ConsiderTrials = ConsiderTrials(~isnan(BpodSystem.Data.Custom.ChoiceLeft(ConsiderTrials))|BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials));
+    if sum(~BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials))/length(ConsiderTrials) > Crit
+        BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.AutoIncrSampleAmount));
+    else
+        BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.AutoIncrSampleAmount));
     end
 else
     BpodSystem.Data.Custom.SampleTime(iTrial+1) = TaskParameters.GUI.MinSampleTime;
 end
 TaskParameters.GUI.SampleTime = BpodSystem.Data.Custom.SampleTime(iTrial+1);
 
+    
+end
 end
