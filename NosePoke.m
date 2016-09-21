@@ -237,7 +237,7 @@ end
 if TaskParameters.GUI.AutoIncrSample
     History = 50;
     Crit = 0.8;
-    if iTrial<10
+    if iTrial<5
         ConsiderTrials = iTrial;
     else
         ConsiderTrials = max(1,iTrial-History):1:iTrial;
@@ -247,13 +247,13 @@ if TaskParameters.GUI.AutoIncrSample
         if ~BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
             BpodSystem.Data.Custom.SampleTime(iTrial+1) = min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) + TaskParameters.GUI.MinSampleIncr));
         else
-             BpodSystem.Data.Custom.SampleTime(iTrial+1) =  BpodSystem.Data.Custom.SampleTime(iTrial);
+             BpodSystem.Data.Custom.SampleTime(iTrial+1) =  min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial)));
         end
     elseif sum(~BpodSystem.Data.Custom.EarlyWithdrawal(ConsiderTrials))/length(ConsiderTrials) < Crit/2
         if BpodSystem.Data.Custom.EarlyWithdrawal(iTrial)
             BpodSystem.Data.Custom.SampleTime(iTrial+1) = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.MaxSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial) - TaskParameters.GUI.MinSampleDecr));
         else
-            BpodSystem.Data.Custom.SampleTime(iTrial+1) =  BpodSystem.Data.Custom.SampleTime(iTrial);
+            BpodSystem.Data.Custom.SampleTime(iTrial+1) =   min(TaskParameters.GUI.MaxSampleTime,max(TaskParameters.GUI.MinSampleTime,BpodSystem.Data.Custom.SampleTime(iTrial)));
         end
     else
         BpodSystem.Data.Custom.SampleTime(iTrial+1) =  BpodSystem.Data.Custom.SampleTime(iTrial);
@@ -261,9 +261,9 @@ if TaskParameters.GUI.AutoIncrSample
 else
     BpodSystem.Data.Custom.SampleTime(iTrial+1) = TaskParameters.GUI.MinSampleTime;
 end
-if BpodSystem.Data.Custom.Jackpot(iTrial)
-    BpodSystem.Data.Custom.SampleTime(iTrial+1) = BpodSystem.Data.Custom.SampleTime(iTrial+1)+0.05*TaskParameters.GUI.JackpotTime;
-end
+% if BpodSystem.Data.Custom.Jackpot(iTrial)
+%     BpodSystem.Data.Custom.SampleTime(iTrial+1) = BpodSystem.Data.Custom.SampleTime(iTrial+1)+0.05*TaskParameters.GUI.JackpotTime;
+% end
 TaskParameters.GUI.SampleTime = BpodSystem.Data.Custom.SampleTime(iTrial+1);
 
     
