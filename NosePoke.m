@@ -102,8 +102,8 @@ LeftValveTime  = GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,1),
 RightValveTime  = GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
 
 JackpotFactor = max(2,10 - sum(BpodSystem.Data.Custom.Jackpot));
-LeftValveTimeJackpot  = GetValveTimes(JackpotFactor*BpodSystem.Data.Custom.RewardMagnitude(iTrial,1), LeftPort);
-RightValveTimeJackpot  = GetValveTimes(JackpotFactor*BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
+LeftValveTimeJackpot  = JackpotFactor*GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,1), LeftPort);
+RightValveTimeJackpot  = JackpotFactor*GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
 
 sma = NewStateMatrix();
 sma = AddState(sma, 'Name', 'state_0',...
