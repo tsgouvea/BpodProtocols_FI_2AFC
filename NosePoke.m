@@ -8,7 +8,7 @@ global TaskParameters
 TaskParameters = BpodSystem.ProtocolSettings;
 if isempty(fieldnames(TaskParameters))
     %general
-    TaskParameters.GUI.Ports_LMR = '423';
+    TaskParameters.GUI.Ports_LMR = '123';
     TaskParameters.GUI.FI = 1; % (s)
     TaskParameters.GUI.VI = false;
     TaskParameters.GUIMeta.VI.Style = 'checkbox';
@@ -48,7 +48,7 @@ BpodSystem.Data.Custom.EarlyWithdrawal(1) = false;
 BpodSystem.Data.Custom.Jackpot(1) = false;
 BpodSystem.Data.Custom.RewardMagnitude = [TaskParameters.GUI.rewardAmount,TaskParameters.GUI.rewardAmount];
 BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
-
+BpodSystem.Data.Custom.Rig = getenv('computername');
 
 %% Initialize plots
 BpodSystem.ProtocolFigures.SideOutcomePlotFig = figure('Position', [200 200 1000 200],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
@@ -102,8 +102,8 @@ LeftValveTime  = GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,1),
 RightValveTime  = GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
 
 JackpotFactor = max(2,10 - sum(BpodSystem.Data.Custom.Jackpot));
-LeftValveTimeJackpot  = GetValveTimes(JackpotFactor*BpodSystem.Data.Custom.RewardMagnitude(iTrial,1), LeftPort);
-RightValveTimeJackpot  = GetValveTimes(JackpotFactor*BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
+LeftValveTimeJackpot  = JackpotFactor*GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,1), LeftPort);
+RightValveTimeJackpot  = JackpotFactor*GetValveTimes(BpodSystem.Data.Custom.RewardMagnitude(iTrial,2), RightPort);
 
 sma = NewStateMatrix();
 sma = AddState(sma, 'Name', 'state_0',...
@@ -266,6 +266,15 @@ end
 % end
 TaskParameters.GUI.SampleTime = BpodSystem.Data.Custom.SampleTime(iTrial+1);
 
-    
+%send bpod status to server
+try
+script = 'receivebpodstatus.php';
+%create a common "outcome" vector
+outcome = BpodSystem.Data.Custom.ChoiceLeft(1:iTrial); %1=left, 0=right
+outcome(BpodSystem.Data.Custom.EarlyWithdrawal(1:iTrial))=3; %early withdrawal=3
+outcome(BpodSystem.Data.Custom.Jackpot(1:iTrial))=4;%jackpot=4
+SendTrialStatusToServer(script,BpodSystem.Data.Custom.Rig,outcome);
+catch
+end
 
 end
