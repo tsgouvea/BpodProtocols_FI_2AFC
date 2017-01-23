@@ -48,7 +48,9 @@ BpodSystem.Data.Custom.EarlyWithdrawal(1) = false;
 BpodSystem.Data.Custom.Jackpot(1) = false;
 BpodSystem.Data.Custom.RewardMagnitude = [TaskParameters.GUI.rewardAmount,TaskParameters.GUI.rewardAmount];
 BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
+%server data
 BpodSystem.Data.Custom.Rig = getenv('computername');
+[~,BpodSystem.Data.Custom.Subject] = fileparts(fileparts(fileparts(fileparts(BpodSystem.DataPath))));
 
 %% Initialize plots
 BpodSystem.ProtocolFigures.SideOutcomePlotFig = figure('Position', [200 200 1000 200],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
@@ -273,7 +275,7 @@ script = 'receivebpodstatus.php';
 outcome = BpodSystem.Data.Custom.ChoiceLeft(1:iTrial); %1=left, 0=right
 outcome(BpodSystem.Data.Custom.EarlyWithdrawal(1:iTrial))=3; %early withdrawal=3
 outcome(BpodSystem.Data.Custom.Jackpot(1:iTrial))=4;%jackpot=4
-SendTrialStatusToServer(script,BpodSystem.Data.Custom.Rig,outcome);
+SendTrialStatusToServer(script,BpodSystem.Data.Custom.Rig,outcome,BpodSystem.Data.Custom.Subject,BpodSystem.CurrentProtocolName);
 catch
 end
 
