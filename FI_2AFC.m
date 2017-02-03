@@ -9,14 +9,14 @@ TaskParameters = BpodSystem.ProtocolSettings;
 if isempty(fieldnames(TaskParameters))
     % General
     TaskParameters.GUI.Ports_LMR = '123';
-    TaskParameters.GUI.FI = 1; % (s)
-    TaskParameters.GUI.VI = false;
+    TaskParameters.GUI.FI = 3; % (s)
+    TaskParameters.GUI.VI = true;
     TaskParameters.GUIMeta.VI.Style = 'checkbox';
     TaskParameters.GUI.ChoiceDeadline = 10;
     TaskParameters.GUIPanels.General = {'Ports_LMR','FI','VI','ChoiceDeadline'};
     % Center Port ("stimulus sampling")
     TaskParameters.GUI.MinSampleTime = 0.05;
-    TaskParameters.GUI.MaxSampleTime = 0.5;
+    TaskParameters.GUI.MaxSampleTime = 1;
     TaskParameters.GUI.AutoIncrSample = true;
     TaskParameters.GUIMeta.AutoIncrSample.Style = 'checkbox';
     TaskParameters.GUI.MinSampleIncr = 0.01;
@@ -39,11 +39,11 @@ if isempty(fieldnames(TaskParameters))
     TaskParameters.GUI = orderfields(TaskParameters.GUI);
     % Side Ports ("waiting for feedback")
     TaskParameters.GUI.MinFeedbackTime = 0.05;
-    TaskParameters.GUI.MaxFeedbackTime = 0.5;
+    TaskParameters.GUI.MaxFeedbackTime = 1;
     TaskParameters.GUI.AutoIncrFeedback = true;
     TaskParameters.GUIMeta.AutoIncrFeedback.Style = 'checkbox';
     TaskParameters.GUI.MinCutoff = 5; % New FeedbackTime as percentile of empirical distribution
-    TaskParameters.GUI.EarlyWithdrEndsTrial = false;
+    TaskParameters.GUI.EarlyWithdrEndsTrial = true;
     TaskParameters.GUIMeta.EarlyWithdrEndsTrial.Style = 'checkbox';
     TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
     TaskParameters.GUIMeta.FeedbackTime.Style = 'text';
@@ -69,10 +69,10 @@ BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
 
 %% Initialize plots
 BpodSystem.GUIHandles.Figs.MainFig = figure('Position', [200, 200, 1000, 400],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
-BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle = axes('Position', [.055 .15 .91 .3]);
-BpodSystem.GUIHandles.Axes.TrialRate.MainHandle = axes('Position', [[1 0]*[.05;.08] .6 .1 .3]);
-BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle = axes('Position', [[2 1]*[.05;.08] .6 .1 .3]);
-BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle = axes('Position', [[3 2]*[.05;.08] .6 .1 .3]);
+BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle = axes('Position', [.06 .15 .91 .3]);
+BpodSystem.GUIHandles.Axes.TrialRate.MainHandle = axes('Position', [[1 0]*[.06;.12] .6 .12 .3]);
+BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle = axes('Position', [[2 1]*[.06;.12] .6 .12 .3]);
+BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle = axes('Position', [[3 2]*[.06;.12] .6 .12 .3]);
 MainPlot('init');
 % BpodNotebook('init');
 

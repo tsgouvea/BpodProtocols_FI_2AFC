@@ -33,7 +33,7 @@ elseif any(strcmp('Rin',statesThisTrial))
 elseif any(strcmp('EarlyWithdrawal',statesThisTrial))
     BpodSystem.Data.Custom.EarlyWithdrawal(iTrial) = true;
 end
-BpodSystem.Data.Custom.Rewarded(iTrial) = any(strncmp('water_',statesThisTrial,7));
+BpodSystem.Data.Custom.Rewarded(iTrial) = any(strncmp('water_',statesThisTrial,6));
 BpodSystem.Data.Custom.Jackpot(iTrial) = any(strcmp('water_LJackpot',statesThisTrial)) || any(strcmp('water_RJackpot',statesThisTrial));
 
 %% initialize next trial values

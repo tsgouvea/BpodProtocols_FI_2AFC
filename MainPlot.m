@@ -1,6 +1,7 @@
 function MainPlot(Action, varargin)
 global nTrialsToShow %this is for convenience
 global BpodSystem
+global TaskParameters
 
 switch Action
     case 'init'
@@ -108,6 +109,7 @@ switch Action
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,BpodSystem.Data.Custom.FeedbackTime*1000);
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist.BinWidth = 50;
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist.EdgeColor = 'none';
+        BpodSystem.GUIHandles.Axes.FeedbackTimes.Cutoff = plot(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,prctile(BpodSystem.Data.Custom.FeedbackTime,TaskParameters.GUI.MinCutoff)*1000,0,'k^');
         
 end
 
