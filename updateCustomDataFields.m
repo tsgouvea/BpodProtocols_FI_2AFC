@@ -4,40 +4,50 @@ global TaskParameters
 
 %% OutcomeRecord
 statesThisTrial = BpodSystem.Data.RawData.OriginalStateNamesByNumber{iTrial}(BpodSystem.Data.RawData.OriginalStateData{iTrial});
-BpodSystem.Data.Custom.ST(iTrial) = NaN;
 if any(strcmp('Cin',statesThisTrial))
     if any(strcmp('stillSampling',statesThisTrial))
         if any(strcmp('stillSamplingJackpot',statesThisTrial))
-            BpodSystem.Data.Custom.ST(iTrial) = BpodSystem.Data.RawEvents.Trial{iTrial}.States.stillSamplingJackpot(1,2) - BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin(1,1);
+            BpodSystem.Data.Custom.SampleTime(iTrial) = BpodSystem.Data.RawEvents.Trial{iTrial}.States.stillSamplingJackpot(1,2) - BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin(1,1);
         else
-            BpodSystem.Data.Custom.ST(iTrial) = BpodSystem.Data.RawEvents.Trial{iTrial}.States.stillSampling(1,2) - BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin(1,1);
+            BpodSystem.Data.Custom.SampleTime(iTrial) = BpodSystem.Data.RawEvents.Trial{iTrial}.States.stillSampling(1,2) - BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin(1,1);
         end
     else
-        BpodSystem.Data.Custom.ST(iTrial) = diff(BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin);
+        BpodSystem.Data.Custom.SampleTime(iTrial) = diff(BpodSystem.Data.RawEvents.Trial{iTrial}.States.Cin);
     end
 end
-
-if any(strncmp('water_L',statesThisTrial,7))
+%% Side ports
+if any(strcmp('Lin',statesThisTrial)) || any(strcmp('Rin',statesThisTrial))
+    Sin = statesThisTrial{strcmp('Lin',statesThisTrial)|strcmp('Rin',statesThisTrial)};
+    if any(strcmp('stillLin',statesThisTrial)) || any(strcmp('stillRin',statesThisTrial))
+        stillSin = statesThisTrial{strcmp('stillLin',statesThisTrial)|strcmp('stillRin',statesThisTrial)};
+        BpodSystem.Data.Custom.FeedbackTime(iTrial) = BpodSystem.Data.RawEvents.Trial{iTrial}.States.(stillSin)(1,2) - BpodSystem.Data.RawEvents.Trial{iTrial}.States.(Sin)(1,1);
+    else
+        BpodSystem.Data.Custom.FeedbackTime(iTrial) = diff(BpodSystem.Data.RawEvents.Trial{iTrial}.States.(Sin));
+    end
+end
+%%
+if any(strcmp('Lin',statesThisTrial))
     BpodSystem.Data.Custom.ChoiceLeft(iTrial) = 1;
-elseif any(strncmp('water_R',statesThisTrial,7))
+elseif any(strcmp('Rin',statesThisTrial))
     BpodSystem.Data.Custom.ChoiceLeft(iTrial) = 0;
 elseif any(strcmp('EarlyWithdrawal',statesThisTrial))
     BpodSystem.Data.Custom.EarlyWithdrawal(iTrial) = true;
 end
-if any(strcmp('water_LJackpot',statesThisTrial)) || any(strcmp('water_RJackpot',statesThisTrial))
-    BpodSystem.Data.Custom.Jackpot(iTrial) = true;
-end
-
+BpodSystem.Data.Custom.Rewarded(iTrial) = any(strncmp('water_',statesThisTrial,7));
+BpodSystem.Data.Custom.Jackpot(iTrial) = any(strcmp('water_LJackpot',statesThisTrial)) || any(strcmp('water_RJackpot',statesThisTrial));
 
 %% initialize next trial values
 BpodSystem.Data.Custom.ChoiceLeft(iTrial+1) = NaN;
 BpodSystem.Data.Custom.EarlyWithdrawal(iTrial+1) = false;
 BpodSystem.Data.Custom.Jackpot(iTrial+1) = false;
+BpodSystem.Data.Custom.Rewarded(iTrial+1) = false;
+BpodSystem.Data.Custom.SampleTime(iTrial+1) = NaN;
+BpodSystem.Data.Custom.FeedbackTime(iTrial+1) = NaN;
 
 %jackpot time
 if  TaskParameters.GUI.Jackpot
     if sum(~isnan(BpodSystem.Data.Custom.ChoiceLeft(1:iTrial)))>10
-        TaskParameters.GUI.JackpotTime = max(TaskParameters.GUI.JackpotMin,quantile(BpodSystem.Data.Custom.ST,0.95));
+        TaskParameters.GUI.JackpotTime = max(TaskParameters.GUI.JackpotMin,quantile(BpodSystem.Data.Custom.SampleTime,0.95));
     else
         TaskParameters.GUI.JackpotTime = TaskParameters.GUI.JackpotMin;
     end
@@ -57,6 +67,7 @@ else
 end
 
 %increase sample time
+%% Center port
 if TaskParameters.GUI.AutoIncrSample
     History = 50;
     Crit = 0.8;
@@ -88,6 +99,13 @@ end
 %     BpodSystem.Data.Custom.SampleTime(iTrial+1) = BpodSystem.Data.Custom.SampleTime(iTrial+1)+0.05*TaskParameters.GUI.JackpotTime;
 % end
 TaskParameters.GUI.SampleTime = BpodSystem.Data.Custom.SampleTime(iTrial+1);
+
+%% Side ports
+if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.FeedbackTime)) >= 10
+    TaskParameters.GUI.FeedbackTime = prctile(BpodSystem.Data.Custom.FeedbackTime,TaskParameters.GUI.MinCutoff);
+else
+    TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
+end
 
 %send bpod status to server
 try

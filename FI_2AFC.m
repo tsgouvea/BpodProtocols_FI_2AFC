@@ -1,4 +1,4 @@
-function NosePoke()
+function FI_2AFC()
 % Learning to Nose Poke side ports
 
 global BpodSystem
@@ -7,14 +7,14 @@ global TaskParameters
 %% Task parameters
 TaskParameters = BpodSystem.ProtocolSettings;
 if isempty(fieldnames(TaskParameters))
-    %general
+    % General
     TaskParameters.GUI.Ports_LMR = '123';
     TaskParameters.GUI.FI = 1; % (s)
     TaskParameters.GUI.VI = false;
     TaskParameters.GUIMeta.VI.Style = 'checkbox';
     TaskParameters.GUI.ChoiceDeadline = 10;
     TaskParameters.GUIPanels.General = {'Ports_LMR','FI','VI','ChoiceDeadline'};
-    %"stimulus"
+    % Center Port ("stimulus sampling")
     TaskParameters.GUI.MinSampleTime = 0.05;
     TaskParameters.GUI.MaxSampleTime = 0.5;
     TaskParameters.GUI.AutoIncrSample = true;
@@ -24,38 +24,56 @@ if isempty(fieldnames(TaskParameters))
     TaskParameters.GUI.EarlyWithdrawalTimeOut = 1;
     TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
     TaskParameters.GUIMeta.SampleTime.Style = 'text';
-    TaskParameters.GUIPanels.Sampling = {'MinSampleTime','MaxSampleTime','AutoIncrSample','MinSampleIncr','MinSampleDecr','EarlyWithdrawalTimeOut','SampleTime'};
-    %Reward
+    TaskParameters.GUIPanels.CenterPort = {'MinSampleTime','MaxSampleTime','AutoIncrSample','MinSampleIncr','MinSampleDecr','EarlyWithdrawalTimeOut','SampleTime'};
+     % Reward
     TaskParameters.GUI.rewardAmount = 30;
     TaskParameters.GUI.Deplete = true;
     TaskParameters.GUIMeta.Deplete.Style = 'checkbox';
     TaskParameters.GUI.DepleteRate = 0.8;
-    TaskParameters.GUI.Jackpot = true;
+    TaskParameters.GUI.Jackpot = false;
     TaskParameters.GUIMeta.Jackpot.Style = 'checkbox';
     TaskParameters.GUI.JackpotMin = 1;
     TaskParameters.GUI.JackpotTime = 1;
     TaskParameters.GUIMeta.JackpotTime.Style = 'text';
-        TaskParameters.GUIPanels.Reward = {'rewardAmount','Deplete','DepleteRate','Jackpot','JackpotMin','JackpotTime'};
+    TaskParameters.GUIPanels.Reward = {'rewardAmount','Deplete','DepleteRate','Jackpot','JackpotMin','JackpotTime'};
     TaskParameters.GUI = orderfields(TaskParameters.GUI);
+    % Side Ports ("waiting for feedback")
+    TaskParameters.GUI.MinFeedbackTime = 0.05;
+    TaskParameters.GUI.MaxFeedbackTime = 0.5;
+    TaskParameters.GUI.AutoIncrFeedback = true;
+    TaskParameters.GUIMeta.AutoIncrFeedback.Style = 'checkbox';
+    TaskParameters.GUI.MinCutoff = 5; % New FeedbackTime as percentile of empirical distribution
+    TaskParameters.GUI.EarlyWithdrEndsTrial = false;
+    TaskParameters.GUIMeta.EarlyWithdrEndsTrial.Style = 'checkbox';
+    TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
+    TaskParameters.GUIMeta.FeedbackTime.Style = 'text';
+    TaskParameters.GUIPanels.SidePorts = {'MinFeedbackTime','MaxFeedbackTime','AutoIncrFeedback','MinCutoff','EarlyWithdrEndsTrial','FeedbackTime'};   
 end
 BpodParameterGUI('init', TaskParameters);
 
 %% Initializing data (trial type) vectors
 
 BpodSystem.Data.Custom.ChoiceLeft = NaN;
-BpodSystem.Data.Custom.SampleTime(1) = TaskParameters.GUI.MinSampleTime;
 BpodSystem.Data.Custom.EarlyWithdrawal(1) = false;
 BpodSystem.Data.Custom.Jackpot(1) = false;
 BpodSystem.Data.Custom.RewardMagnitude = [TaskParameters.GUI.rewardAmount,TaskParameters.GUI.rewardAmount];
-BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
+BpodSystem.Data.Custom.Rewarded = false;
+BpodSystem.Data.Custom.SampleTime(1) = NaN;
+BpodSystem.Data.Custom.FeedbackTime(1) = NaN;
+
 %server data
 BpodSystem.Data.Custom.Rig = getenv('computername');
 [~,BpodSystem.Data.Custom.Subject] = fileparts(fileparts(fileparts(fileparts(BpodSystem.DataPath))));
 
+BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
+
 %% Initialize plots
-BpodSystem.ProtocolFigures.SideOutcomePlotFig = figure('Position', [200 200 1000 200],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
-BpodSystem.GUIHandles.SideOutcomePlot = axes('Position', [.075 .3 .89 .6]);
-NosePoke_PlotSideOutcome(BpodSystem.GUIHandles.SideOutcomePlot,'init');
+BpodSystem.GUIHandles.Figs.MainFig = figure('Position', [200, 200, 1000, 400],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
+BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle = axes('Position', [.055 .15 .91 .3]);
+BpodSystem.GUIHandles.Axes.TrialRate.MainHandle = axes('Position', [[1 0]*[.05;.08] .6 .1 .3]);
+BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle = axes('Position', [[2 1]*[.05;.08] .6 .1 .3]);
+BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle = axes('Position', [[3 2]*[.05;.08] .6 .1 .3]);
+MainPlot('init');
 % BpodNotebook('init');
 
 %% Main loop
@@ -79,6 +97,6 @@ while RunSession
     
     updateCustomDataFields(iTrial)
     iTrial = iTrial + 1;
-    NosePoke_PlotSideOutcome(BpodSystem.GUIHandles.SideOutcomePlot,'update',iTrial);
+    MainPlot('update',iTrial);
 end
 end
