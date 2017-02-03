@@ -93,12 +93,17 @@ switch Action
         
         %% Stimulus delay
         cla(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle)
-        BpodSystem.GUIHandles.Axes.SampleTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,BpodSystem.Data.Custom.SampleTime*1000);
+        BpodSystem.GUIHandles.Axes.SampleTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,BpodSystem.Data.Custom.SampleTime...
+            (~BpodSystem.Data.Custom.EarlyWithdrawal)*1000);
         BpodSystem.GUIHandles.Axes.SampleTimes.Hist.BinWidth = 50;
         BpodSystem.GUIHandles.Axes.SampleTimes.Hist.EdgeColor = 'none';
-%         BpodSystem.GUIHandles.Axes.SampleTimes.Hist.FaceColor = 'r';
+        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,BpodSystem.Data.Custom.SampleTime...
+            (BpodSystem.Data.Custom.EarlyWithdrawal)*1000);
+        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.BinWidth = 50;
+        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.EdgeColor = 'none';
+        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.FaceColor = 'r';
         
-        %% ST
+        %% Feedback Delay
         cla(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle)
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,BpodSystem.Data.Custom.FeedbackTime*1000);
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist.BinWidth = 50;
