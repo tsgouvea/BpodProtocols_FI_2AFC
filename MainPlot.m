@@ -20,9 +20,9 @@ switch Action
         axes(BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle)
         BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCircle = line(-1,0.5, 'LineStyle','none','Marker','o','MarkerEdge','k','MarkerFace',[1 1 1], 'MarkerSize',6);
         BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCross = line(-1,0.5, 'LineStyle','none','Marker','+','MarkerEdge','k','MarkerFace',[1 1 1], 'MarkerSize',6);
-        BpodSystem.GUIHandles.Axes.OutcomePlot.RewardedL = line(-1,1, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
-        BpodSystem.GUIHandles.Axes.OutcomePlot.RewardedR = line(-1,0, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
-        BpodSystem.GUIHandles.Axes.OutcomePlot.EarlyWithdrawal = line(-1,0, 'LineStyle','none','Marker','d','MarkerEdge','none','MarkerFace','b', 'MarkerSize',6);
+        BpodSystem.GUIHandles.Axes.OutcomePlot.Rewarded = line(-1,1, 'LineStyle','none','Marker','o','MarkerEdge','g','MarkerFace','g', 'MarkerSize',6);
+        BpodSystem.GUIHandles.Axes.OutcomePlot.EarlyCout = line(-1,0, 'LineStyle','none','Marker','d','MarkerEdge','none','MarkerFace','b', 'MarkerSize',6);
+        BpodSystem.GUIHandles.Axes.OutcomePlot.EarlySout = line(-1,0, 'LineStyle','none','Marker','d','MarkerEdge','none','MarkerFace','b', 'MarkerSize',6);
         BpodSystem.GUIHandles.Axes.OutcomePlot.Jackpot = line(-1,0, 'LineStyle','none','Marker','x','MarkerEdge','r','MarkerFace','r', 'MarkerSize',7);
         BpodSystem.GUIHandles.Axes.OutcomePlot.CumRwd = text(1,1,'0mL','verticalalignment','bottom','horizontalalignment','center');
         set(BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle,'TickDir', 'out','YLim', [-1, 2],'XLim',[0,nTrialsToShow], 'YTick', [0 1],'YTickLabel', {'Right','Left'}, 'FontSize', 16);
@@ -49,28 +49,32 @@ switch Action
         iTrial = varargin{1};
         [mn, ~] = rescaleX(BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle,iTrial,nTrialsToShow); % recompute xlim
         
-        set(BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCircle, 'xdata', iTrial+1, 'ydata', 0.5);
-        set(BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCross, 'xdata', iTrial+1, 'ydata', 0.5);
+        set(BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCircle, 'xdata', iTrial, 'ydata', 0.5);
+        set(BpodSystem.GUIHandles.Axes.OutcomePlot.CurrentTrialCross, 'xdata', iTrial, 'ydata', 0.5);
         
         %Plot past trials
         ChoiceLeft = BpodSystem.Data.Custom.ChoiceLeft;
-        if ~isempty(ChoiceLeft)
+        Rewarded = BpodSystem.Data.Custom.Rewarded;
+        if ~isempty(Rewarded)
             indxToPlot = mn:iTrial-1;
-            %Plot Rewarded Left
-            ndxRwdL = ChoiceLeft(indxToPlot) == 1;
-            Xdata = indxToPlot(ndxRwdL); Ydata = ones(1,sum(ndxRwdL));
-            set(BpodSystem.GUIHandles.Axes.OutcomePlot.RewardedL, 'xdata', Xdata, 'ydata', Ydata);
-            %Plot Rewarded Right
-            ndxRwdR = ChoiceLeft(indxToPlot) == 0;
-            Xdata = indxToPlot(ndxRwdR); Ydata = zeros(1,sum(ndxRwdR));
-            set(BpodSystem.GUIHandles.Axes.OutcomePlot.RewardedR, 'xdata', Xdata, 'ydata', Ydata);            
+            ndxRwd = Rewarded(indxToPlot) == 1;
+            Xdata = indxToPlot(ndxRwd);
+            Ydata = ChoiceLeft(indxToPlot); Ydata = Ydata(ndxRwd);
+            set(BpodSystem.GUIHandles.Axes.OutcomePlot.Rewarded, 'xdata', Xdata, 'ydata', Ydata);
         end
-        if ~isempty(BpodSystem.Data.Custom.EarlyWithdrawal)
+        if ~isempty(BpodSystem.Data.Custom.EarlyCout)
             indxToPlot = mn:iTrial-1;
-            ndxEarly = BpodSystem.Data.Custom.EarlyWithdrawal(indxToPlot);
+            ndxEarly = BpodSystem.Data.Custom.EarlyCout(indxToPlot);
             XData = indxToPlot(ndxEarly);
             YData = 0.5*ones(1,sum(ndxEarly));
-            set(BpodSystem.GUIHandles.Axes.OutcomePlot.EarlyWithdrawal, 'xdata', XData, 'ydata', YData);
+            set(BpodSystem.GUIHandles.Axes.OutcomePlot.EarlyCout, 'xdata', XData, 'ydata', YData);
+        end
+        if ~isempty(BpodSystem.Data.Custom.EarlySout)
+            indxToPlot = mn:iTrial-1;
+            ndxEarly = BpodSystem.Data.Custom.EarlySout(indxToPlot);
+            XData = indxToPlot(ndxEarly);
+            YData = ChoiceLeft(indxToPlot); YData = YData(ndxEarly);
+            set(BpodSystem.GUIHandles.Axes.OutcomePlot.EarlySout, 'xdata', XData, 'ydata', YData);
         end
         if ~isempty(BpodSystem.Data.Custom.Jackpot)
             indxToPlot = mn:iTrial-1;
@@ -94,22 +98,26 @@ switch Action
         
         %% Stimulus delay
         cla(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle)
-        BpodSystem.GUIHandles.Axes.SampleTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,BpodSystem.Data.Custom.SampleTime...
-            (~BpodSystem.Data.Custom.EarlyWithdrawal)*1000);
+        BpodSystem.GUIHandles.Axes.SampleTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,...
+            BpodSystem.Data.Custom.SampleTime(~BpodSystem.Data.Custom.EarlyCout)*1000);
         BpodSystem.GUIHandles.Axes.SampleTimes.Hist.BinWidth = 50;
         BpodSystem.GUIHandles.Axes.SampleTimes.Hist.EdgeColor = 'none';
-        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,BpodSystem.Data.Custom.SampleTime...
-            (BpodSystem.Data.Custom.EarlyWithdrawal)*1000);
+        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly = histogram(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,...
+            BpodSystem.Data.Custom.SampleTime(BpodSystem.Data.Custom.EarlyCout)*1000);
         BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.BinWidth = 50;
         BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.EdgeColor = 'none';
-        BpodSystem.GUIHandles.Axes.SampleTimes.HistEarly.FaceColor = 'r';
+        BpodSystem.GUIHandles.Axes.SampleTimes.CutOff = plot(BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle,TaskParameters.GUI.SampleTime*1000,0,'^k');
         
-        %% Feedback Delay
+        %% Feedback delay
         cla(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle)
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist = histogram(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,BpodSystem.Data.Custom.FeedbackTime*1000);
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist.BinWidth = 50;
         BpodSystem.GUIHandles.Axes.FeedbackTimes.Hist.EdgeColor = 'none';
-        BpodSystem.GUIHandles.Axes.FeedbackTimes.Cutoff = plot(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,prctile(BpodSystem.Data.Custom.FeedbackTime,TaskParameters.GUI.MinCutoff)*1000,0,'k^');
+        BpodSystem.GUIHandles.Axes.FeedbackTimes.HistEarly = histogram(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,...
+            BpodSystem.Data.Custom.FeedbackTime(BpodSystem.Data.Custom.EarlySout)*1000);
+        BpodSystem.GUIHandles.Axes.FeedbackTimes.HistEarly.BinWidth = 50;
+        BpodSystem.GUIHandles.Axes.FeedbackTimes.HistEarly.EdgeColor = 'none';
+        BpodSystem.GUIHandles.Axes.FeedbackTimes.CutOff = plot(BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle,TaskParameters.GUI.FeedbackTime*1000,0,'^k');
         
 end
 
