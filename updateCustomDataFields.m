@@ -74,6 +74,7 @@ if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.Sample
 else
     TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
 end
+TaskParameters.GUI.SampleTime = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.SampleTime,TaskParameters.GUI.MaxSampleTime));
 
 %% Side ports
 if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.FeedbackTime)) >= 10
@@ -81,16 +82,17 @@ if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.Feedba
 else
     TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
 end
+TaskParameters.GUI.FeedbackTime = max(TaskParameters.GUI.MinFeedbackTime,min(TaskParameters.GUI.FeedbackTime,TaskParameters.GUI.MaxFeedbackTime));
 
-%send bpod status to server
+%% send bpod status to server
 try
-    script = 'receivebpodstatus.php';
+    BpodSystem.Data.Custom.Script = 'receivebpodstatus.php';
     %create a common "outcome" vector
     outcome = BpodSystem.Data.Custom.ChoiceLeft(1:iTrial); %1=left, 0=right
     outcome(BpodSystem.Data.Custom.EarlyCout(1:iTrial))=3; %early C withdrawal=3
     outcome(BpodSystem.Data.Custom.Jackpot(1:iTrial))=4; %jackpot=4
     outcome(BpodSystem.Data.Custom.EarlySout(1:iTrial))=5; %early S withdrawal=5
-    SendTrialStatusToServer(script,BpodSystem.Data.Custom.Rig,outcome,BpodSystem.Data.Custom.Subject,BpodSystem.CurrentProtocolName);
+    SendTrialStatusToServer(BpodSystem.Data.Custom.Script,BpodSystem.Data.Custom.Rig,outcome,BpodSystem.Data.Custom.Subject,BpodSystem.CurrentProtocolName);
 catch
 end
 end
