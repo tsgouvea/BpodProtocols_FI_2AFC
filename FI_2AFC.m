@@ -65,6 +65,10 @@ BpodSystem.Data.Custom.Rig = getenv('computername');
 
 BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
 
+%% Set up PulsePal
+load PulsePalParamFeedback.mat
+BpodSystem.Data.Custom.PulsePalParamFeedback=PulsePalParamFeedback;
+
 %% Initialize plots
 BpodSystem.GUIHandles.Figs.MainFig = figure('Position', [200, 200, 1000, 400],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
 BpodSystem.GUIHandles.Axes.OutcomePlot.MainHandle = axes('Position', [.06 .15 .91 .3]);
