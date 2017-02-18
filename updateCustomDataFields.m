@@ -70,7 +70,7 @@ end
 %increase sample time
 %% Center port
 if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.SampleTime)) >= 10
-    TaskParameters.GUI.SampleTime = prctile(BpodSystem.Data.Custom.SampleTime,TaskParameters.GUI.MinCutoff);
+    TaskParameters.GUI.SampleTime = prctile(BpodSystem.Data.Custom.SampleTime(max(1,end-100):end),TaskParameters.GUI.MinCutoff);
 else
     TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
 end
