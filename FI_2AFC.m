@@ -68,6 +68,8 @@ BpodSystem.Data.Custom = orderfields(BpodSystem.Data.Custom);
 %% Set up PulsePal
 load PulsePalParamFeedback.mat
 BpodSystem.Data.Custom.PulsePalParamFeedback=PulsePalParamFeedback;
+ProgramPulsePal(BpodSystem.Data.Custom.PulsePalParamFeedback);
+BpodSystem.SoftCodeHandlerFunction = 'SoftCodeHandler';
 
 %% Initialize plots
 BpodSystem.GUIHandles.Figs.MainFig = figure('Position', [200, 200, 1000, 400],'name','Outcome plot','numbertitle','off', 'MenuBar', 'none', 'Resize', 'off');
