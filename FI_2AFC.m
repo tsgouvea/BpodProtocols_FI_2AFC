@@ -8,25 +8,25 @@ global TaskParameters
 TaskParameters = BpodSystem.ProtocolSettings;
 if isempty(fieldnames(TaskParameters))
     % Center Port ("stimulus sampling")
-    TaskParameters.GUI.MinSampleTime = 0.05;
-    TaskParameters.GUI.MaxSampleTime = 0.5;
+    TaskParameters.GUI.MinSampleTime = 0;
+    TaskParameters.GUI.MaxSampleTime = 1;
     TaskParameters.GUI.AutoIncrSample = true;
     TaskParameters.GUIMeta.AutoIncrSample.Style = 'checkbox';
-    TaskParameters.GUI.EarlyCoutPenalty = 1;
+    TaskParameters.GUI.EarlyCoutPenalty = 5;
     TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
     TaskParameters.GUIMeta.SampleTime.Style = 'text';
     TaskParameters.GUIPanels.CenterPort = {'EarlyCoutPenalty','AutoIncrSample','MinSampleTime','MaxSampleTime','SampleTime'};
     % General
     TaskParameters.GUI.Ports_LMR = '123';
-    TaskParameters.GUI.FI = 1; % (s)
-    TaskParameters.GUI.VI = false;
+    TaskParameters.GUI.ITI = 1; % (s)
+    TaskParameters.GUI.VI = false; % random ITI
     TaskParameters.GUIMeta.VI.Style = 'checkbox';
     TaskParameters.GUI.ChoiceDeadline = 10;
-    TaskParameters.GUI.MinCutoff = 20; % New waiting time as percentile of empirical distribution
+    TaskParameters.GUI.MinCutoff = 50; % New waiting time as percentile of empirical distribution
     TaskParameters.GUIPanels.General = {'Ports_LMR','FI','VI','ChoiceDeadline','MinCutoff'};
     % Side Ports ("waiting for feedback")
-    TaskParameters.GUI.MinFeedbackTime = 0.05;
-    TaskParameters.GUI.MaxFeedbackTime = 0.5;
+    TaskParameters.GUI.MinFeedbackTime = 0;
+    TaskParameters.GUI.MaxFeedbackTime = 1;
     TaskParameters.GUI.EarlySoutPenalty = 1;
     TaskParameters.GUI.AutoIncrFeedback = true;
     TaskParameters.GUIMeta.AutoIncrFeedback.Style = 'checkbox';
@@ -76,7 +76,7 @@ BpodSystem.GUIHandles.Axes.TrialRate.MainHandle = axes('Position', [[1 0]*[.06;.
 BpodSystem.GUIHandles.Axes.SampleTimes.MainHandle = axes('Position', [[2 1]*[.06;.12] .6 .12 .3]);
 BpodSystem.GUIHandles.Axes.FeedbackTimes.MainHandle = axes('Position', [[3 2]*[.06;.12] .6 .12 .3]);
 MainPlot('init');
-% BpodNotebook('init');
+BpodNotebook('init');
 
 %% Main loop
 RunSession = true;

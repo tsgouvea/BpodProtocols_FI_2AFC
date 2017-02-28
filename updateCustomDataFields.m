@@ -69,18 +69,26 @@ end
 
 %increase sample time
 %% Center port
-if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.SampleTime)) >= 10
-    TaskParameters.GUI.SampleTime = prctile(BpodSystem.Data.Custom.SampleTime,TaskParameters.GUI.MinCutoff);
+if TaskParameters.GUI.AutoIncrSample
+    if sum(~isnan(BpodSystem.Data.Custom.SampleTime)) >= 10
+        TaskParameters.GUI.SampleTime = prctile(BpodSystem.Data.Custom.SampleTime,TaskParameters.GUI.MinCutoff);
+    else
+        TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
+    end
 else
-    TaskParameters.GUI.SampleTime = TaskParameters.GUI.MinSampleTime;
+    TaskParameters.GUI.SampleTime = TaskParameters.GUI.MaxSampleTime;
 end
 TaskParameters.GUI.SampleTime = max(TaskParameters.GUI.MinSampleTime,min(TaskParameters.GUI.SampleTime,TaskParameters.GUI.MaxSampleTime));
 
 %% Side ports
-if TaskParameters.GUI.AutoIncrSample && sum(~isnan(BpodSystem.Data.Custom.FeedbackTime)) >= 10
-    TaskParameters.GUI.FeedbackTime = prctile(BpodSystem.Data.Custom.FeedbackTime,TaskParameters.GUI.MinCutoff);
+if TaskParameters.GUI.AutoIncrSample
+    if sum(~isnan(BpodSystem.Data.Custom.FeedbackTime)) >= 10
+        TaskParameters.GUI.FeedbackTime = prctile(BpodSystem.Data.Custom.FeedbackTime,TaskParameters.GUI.MinCutoff);
+    else
+        TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
+    end
 else
-    TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MinFeedbackTime;
+    TaskParameters.GUI.FeedbackTime = TaskParameters.GUI.MaxFeedbackTime;
 end
 TaskParameters.GUI.FeedbackTime = max(TaskParameters.GUI.MinFeedbackTime,min(TaskParameters.GUI.FeedbackTime,TaskParameters.GUI.MaxFeedbackTime));
 
